@@ -12,7 +12,6 @@ fallback is accepted.
 ## Table of Contents
 
 - [Features](#features)
-- [Screenshots](#screenshots)
 - [Requirements](#requirements)
 - [Layer structure](#layer-structure)
 - [Build (Yocto)](#build-yocto)
@@ -36,19 +35,31 @@ fallback is accepted.
 
 ## Requirements
 
-- Yocto **scarthgap** based distro with the following layers:
-  - `meta-qt6` (Qt 6.8.x: `qtbase`, `qtdeclarative`)
-  - `meta-watermelon-wine` (stable WPE stack: `wpewebkit` 2.52.6,
-    `wpebackend-fdo` 1.16.1, `libwpe` 1.16.3)
-  - `meta-openembedded` as required by the layers above
-- Distro features: `wayland` and `opengl` (the `wpewebkit` recipe requires
-  `opengl`; the browser requires a Wayland compositor such as Weston)
-- GPU with EGL/GLES support (STM32MP257F GPU, or any host with Mesa)
+The layer is **self-contained for the entire WPE stack** — `libwpe`,
+`wpebackend-fdo` and `wpewebkit` recipes are all shipped by this layer — and
+depends only on well-known public layers:
+
+- **openembedded-core** (`core`) — provides `vulkan-volk`, `vulkan-headers`,
+  `vulkan-loader`, `gstreamer1.0`, `wayland`, `libdrm`, etc.
+- **meta-openembedded** — the following collections from the standard
+  checkout:
+  - `openembedded-layer` — `libjxl`, `libbacktrace`, `lcms`, `libepoxy` and
+    friends
+  - `multimedia-layer` — `libavif`
+  - `meta-python` — pulled in by `qt6-layer`
+- **meta-qt6** (`qt6-layer`) — provides Qt 6.8.x (`qtbase`, `qtdeclarative`)
+
+Yocto release: **scarthgap**.
+
+Distro features required: `wayland` and `opengl` (the `wpewebkit` recipe
+enforces `opengl`; the browser needs a Wayland compositor such as Weston).
+Target hardware: any GPU with EGL/GLES support (e.g. the STM32MP257F used by
+Watermelon Wine 1A). No proprietary or private layer is required.
 
 ### Note on WebGPU
 
 WPE WebKit 2.52 does not expose a runtime WebGPU switch — it is a build-time
-flag (`-DENABLE_WEBGPU=ON`). The `meta-watermelon-wine` `wpewebkit` build does
+flag (`-DENABLE_WEBGPU=ON`). The `wpewebkit` recipe shipped in this layer does
 not enable it; everything else (WebGL, canvas, media, WebRTC) is available.
 
 ## Layer structure
@@ -58,6 +69,14 @@ meta-wpeqt/
 ├── conf/
 │   └── layer.conf                     # layer registration
 ├── recipes-browser/
+│   ├── libwpe/
+│   │   └── libwpe_1.16.3.bb           # WPE core library (BSD-2-Clause)
+│   ├── wpebackend-fdo/
+│   │   ├── wpebackend-fdo_1.16.1.bb   # freedesktop.org WPE backend
+│   │   └── wpebackend-fdo_%.bbappend  # runtime dlopen() symlink for WpeQt
+│   ├── wpewebkit/
+│   │   ├── wpewebkit_2.52.6.bb        # WPE WebKit engine
+│   │   └── files/                     # bwrap + libsoup MIME patches
 │   ├── packagegroups/
 │   │   └── packagegroup-wpeqt.bb      # runtime packagegroup
 │   └── wpeqt/
@@ -87,6 +106,9 @@ BBLAYERS += " \
     /path/to/meta-wpeqt \
 "
 ```
+
+The layer resolves its own `libwpe`, `wpebackend-fdo` and `wpewebkit`
+recipes, so no extra WPE layer is needed.
 
 Build either the browser package or the full image:
 
@@ -169,6 +191,11 @@ Design notes:
 ## License
 
 The layer and WpeQt sources are distributed under the **MIT** license.
-See `recipes-browser/wpeqt/files/wpeqt/LICENSE`. The WPE stack itself
-(`wpewebkit`, `wpebackend-fdo`, `libwpe`) is governed by its own licenses in
-`meta-watermelon-wine`.
+See `recipes-browser/wpeqt/files/wpeqt/LICENSE`.
+
+| Component            | License             | Where in the layer                          |
+| -------------------- | ------------------- | -------------------------------------------- |
+| WpeQt (app, recipes) | MIT                 | `recipes-browser/wpeqt/`                     |
+| wpewebkit            | BSD-2-Clause / LGPL | `recipes-browser/wpewebkit/`                 |
+| wpebackend-fdo       | BSD-2-Clause        | `recipes-browser/wpebackend-fdo/`            |
+| libwpe               | BSD-2-Clause        | `recipes-browser/libwpe/`                    |
