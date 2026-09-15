@@ -37,17 +37,35 @@ fallback is accepted.
 
 The layer is **self-contained for the entire WPE stack** — `libwpe`,
 `wpebackend-fdo` and `wpewebkit` recipes are all shipped by this layer — and
-depends only on well-known public layers:
+depends only on well-known public layers.
 
-- **openembedded-core** (`core`) — provides `vulkan-volk`, `vulkan-headers`,
-  `vulkan-loader`, `gstreamer1.0`, `wayland`, `libdrm`, etc.
-- **meta-openembedded** — the following collections from the standard
-  checkout:
-  - `openembedded-layer` — `libjxl`, `libbacktrace`, `lcms`, `libepoxy` and
-    friends
-  - `multimedia-layer` — `libavif`
-  - `meta-python` — pulled in by `qt6-layer`
-- **meta-qt6** (`qt6-layer`) — provides Qt 6.8.x (`qtbase`, `qtdeclarative`)
+### Meta-layer dependencies
+
+| Meta-layer | Yocto collection | Provides |
+|---|---|---|
+| openembedded-core | `core` | `virtual/egl`, `libdrm`, `libxkbcommon`, `wayland`, `vulkan-headers`/`vulkan-loader`/`vulkan-volk`, `gstreamer1.0`, all `-plugins-*` |
+| meta-openembedded | `openembedded-layer` | `libjxl`, `libbacktrace`, `lcms`, `libepoxy` |
+| meta-openembedded | `multimedia-layer` | `libavif` |
+| meta-openembedded | `meta-python` | pulled in by `qt6-layer` |
+| meta-qt6 | `qt6-layer` | Qt 6.8 (`qtbase`, `qtdeclarative`) |
+
+### Required distro features
+
+- `wayland` — Wayland compositor (e.g. Weston)
+- `opengl` — EGL/GLES stack from the BSP
+
+### Implicit runtime dependencies
+
+These are not declared as explicit DEPENDS but are required for correct
+operation on target:
+
+| Package | Purpose |
+|---|---|
+| `libxkbcommon` | XKB keymap processing (keyboard scancode → keysym translation) for WPE + Wayland + Qt |
+| `virtual/egl` | EGL display / context for GPU compositing |
+| `vulkan-loader` | WPE WebKit builds with `USE_VULKAN=ON`; loader is recommended at runtime |
+| `ca-certificates` | HTTPS support (WPE WebKit RRECOMMENDS) |
+| Wayland compositor | WpeQt renders into a Wayland surface; a compositor (Weston etc.) must be running |
 
 Yocto release: **scarthgap**.
 
