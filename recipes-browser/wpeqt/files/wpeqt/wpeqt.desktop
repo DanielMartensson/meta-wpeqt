@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=WpeQt
+Name[sv]=WpeQt
+Comment=Minimal Qt6 QML browser powered by the WPE WebKit engine
+Comment[sv]=Minimal Qt6 QML webbläsare med WPE WebKit som webmotor
+Exec=wpeqt
+Terminal=false
+Categories=Network;WebBrowser;
