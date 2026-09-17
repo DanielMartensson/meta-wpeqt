@@ -15,6 +15,7 @@ REQUIRED_DISTRO_FEATURES = "wayland opengl"
 DEPENDS += " \
     qtbase \
     qtdeclarative \
+    qtdeclarative-native \
     wpewebkit \
     wpebackend-fdo \
     libwpe \
