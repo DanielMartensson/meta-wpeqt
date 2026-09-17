@@ -8,7 +8,7 @@ HOMEPAGE = "https://github.com/DanielMartensson/meta-wpeqt"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=6c7bd58213aecdf2fd702be55f876f47"
 
-inherit cmake pkgconfig features_check
+inherit qt6-cmake pkgconfig features_check
 
 REQUIRED_DISTRO_FEATURES = "wayland opengl"
 
