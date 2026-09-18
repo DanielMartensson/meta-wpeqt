@@ -25,11 +25,11 @@ qt_add_executable(wpeqt
     src/wpeviewitem.cpp
 )
 
-qt_add_qml_module(wpeqt
-    URI WpeQt
-    VERSION 1.0
-    RESOURCES
-        qml/Main.qml
+qt_add_resources(wpeqt "qml"
+    PREFIX "/qt/qml/WpeQt"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/qml/Main.qml"
 )
 
 target_link_libraries(wpeqt PRIVATE
